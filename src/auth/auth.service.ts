@@ -1,16 +1,20 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import * as bcrypt from 'bcrypt'
 import { CreateUserDto, LoginUserDto } from './dto';
+import { JwtPayload } from './interface/jwt-payload.interface';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
 
   constructor(
     @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>
+    private readonly userRepository: Repository<UserEntity>,
+
+    private readonly jwtService: JwtService
   ){}
 
   async create( createUserDto: CreateUserDto ) {
@@ -25,7 +29,7 @@ export class AuthService {
 
       return user;
     } catch (error) {
-      
+      throw new BadRequestException(error.detail)
     }
     
   };
@@ -44,6 +48,14 @@ export class AuthService {
     if(!bcrypt.compareSync(password, user.password))
       throw new UnauthorizedException('Usuario o contraseña incorrecta');
 
-    return user;
+    return {
+      ...user, 
+      token: this.getJwToken({email: user.email})
+    };
+  }
+
+  private getJwToken(payload: JwtPayload){
+    const token = this.jwtService.sign(payload);
+    return token;
   }
 }
