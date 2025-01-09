@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [ 
@@ -12,7 +13,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       database: 'planing',
       autoLoadEntities: true,
       synchronize: true,
-    }),
+      //dropSchema: true
+    }), AuthModule,
   ],
 })
 export class AppModule {}
