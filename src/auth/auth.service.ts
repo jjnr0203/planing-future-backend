@@ -40,7 +40,7 @@ export class AuthService {
     
     const user = await this.userRepository.findOne({
       where: {email},
-      select: { email: true, password: true}
+      select: { email: true, password: true, id: true}
     });
 
     if(!user) throw new UnauthorizedException('Usuario o contraseña incorrecta');
@@ -50,7 +50,7 @@ export class AuthService {
 
     return {
       ...user, 
-      token: this.getJwToken({email: user.email})
+      token: this.getJwToken({id:user.id})
     };
   }
 
